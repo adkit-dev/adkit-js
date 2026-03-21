@@ -55,10 +55,11 @@ const mountedSlots = new Set<string>()
 export function sendEvent(event: AdkitEvent): void {
   try {
     const payload = JSON.stringify(event)
+    const blob = new Blob([payload], { type: "application/json" })
 
     // Prefer sendBeacon for reliability (non-blocking, survives unload)
     if (navigator.sendBeacon) {
-      navigator.sendBeacon(ADKIT_EVENTS_URL, payload)
+      navigator.sendBeacon(ADKIT_EVENTS_URL, blob)
     } else {
       // Fallback to fetch with keepalive
       fetch(ADKIT_EVENTS_URL, {

@@ -13,7 +13,7 @@ Drop a script tag and a `<div>` on your page. The SDK renders ad slots that eith
 ## Quick Start
 
 ```html
-<script src="https://cdn.adkit.io/v1.js" defer></script>
+<script src="https://cdn.adkit.dev/v1.js" defer></script>
 
 <div
   data-adkit-site="your-site-id"
@@ -29,7 +29,7 @@ That's it. The SDK auto-discovers and renders the slot.
 **CDN (recommended):**
 
 ```html
-<script src="https://cdn.adkit.io/v1.js" defer></script>
+<script src="https://cdn.adkit.dev/v1.js" defer></script>
 ```
 
 **Self-hosted:**
@@ -267,7 +267,7 @@ Silent mode (no tracking):
 If your site uses CSP, allow:
 
 ```
-script-src: cdn.adkit.io
+script-src: cdn.adkit.dev
 connect-src: adkit.dev
 img-src: ufs.sh (uploadthing)
 ```

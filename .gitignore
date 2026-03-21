@@ -5,3 +5,4 @@ dist/
 deploy.sh
 DOCUMENTATION.md
 test.html
+.wrangler/

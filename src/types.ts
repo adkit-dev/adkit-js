@@ -107,7 +107,7 @@ export type SlotConfig = {
  * {
  *   status: "active",
  *   bookingId: "booking-123",
- *   imageUrl: "https://cdn.adkit.io/ads/image.jpg",
+ *   imageUrl: "https://cdn.adkit.dev/ads/image.jpg",
  *   linkUrl: "https://advertiser.com/landing",
  *   expiresAt: "2026-03-28T04:59:59.999Z"
  * }

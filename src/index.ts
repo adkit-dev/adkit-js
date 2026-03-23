@@ -56,6 +56,9 @@ declare global {
  */
 const slotStates = new Map<string, { config: SlotConfig; response: ServeResponse | null }>()
 
+/** Flag to prevent concurrent initialization runs */
+let isInitializing = false
+
 // ============================================================================
 // SLOT INITIALIZATION
 // ============================================================================
@@ -109,12 +112,17 @@ async function initializeSlot(config: SlotConfig): Promise<void> {
  * This function is called on initial load and by the MutationObserver.
  */
 async function initializeAllSlots(): Promise<void> {
+  if (isInitializing) return
+  isInitializing = true
+
   try {
     const configs = discoverSlots()
     if (configs.length === 0) return
     await Promise.all(configs.map(initializeSlot))
   } catch (error) {
     captureException(error, { phase: "initializeAllSlots" })
+  } finally {
+    isInitializing = false
   }
 }
 
@@ -136,25 +144,41 @@ let mutationObserver: MutationObserver | null = null
  * re-scans for new slots after a debounce period.
  */
 function setupMutationObserver(): void {
-  // Skip if MutationObserver is not available (old browsers)
   if (typeof MutationObserver === "undefined") return
 
-  mutationObserver = new MutationObserver(() => {
-    // Debounce: clear any pending timeout
+  mutationObserver = new MutationObserver((mutations) => {
+    // Skip if we're currently initializing (our own DOM changes)
+    if (isInitializing) return
+
+    // Check if any mutation added a new slot element (not just modified existing ones)
+    const hasNewSlot = mutations.some((mutation) => {
+      for (const node of mutation.addedNodes) {
+        if (node instanceof HTMLElement) {
+          if (node.dataset?.adkitSlot && node.dataset?.adkitInitialized !== "true") {
+            return true
+          }
+          if (node.querySelector?.("[data-adkit-slot]:not([data-adkit-initialized='true'])")) {
+            return true
+          }
+        }
+      }
+      return false
+    })
+
+    if (!hasNewSlot) return
+
     if (mutationTimeout) {
       clearTimeout(mutationTimeout)
     }
 
-    // Wait for DOM churn to settle before scanning
     mutationTimeout = setTimeout(() => {
       initializeAllSlots()
     }, MUTATION_DEBOUNCE_MS)
   })
 
-  // Watch the entire document body for changes
   mutationObserver.observe(document.body, {
-    childList: true, // Watch for added/removed nodes
-    subtree: true,   // Watch all descendants, not just direct children
+    childList: true,
+    subtree: true,
   })
 }
 

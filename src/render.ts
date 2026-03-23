@@ -153,8 +153,6 @@ function renderActiveAd(
   // Create slot container
   const slot = document.createElement("div")
   slot.className = `adkit-slot adkit-slot--default-width ${existingClasses}`.trim()
-  slot.dataset.adkitSite = config.siteId
-  slot.dataset.adkitSlot = config.slot
   slot.dataset.adkitRatio = config.aspectRatio
   slot.dataset.adkitSize = config.size
 
@@ -228,8 +226,6 @@ function renderPlaceholder(config: SlotConfig, existingClasses: string): void {
   // Create slot container
   const slot = document.createElement("div")
   slot.className = `adkit-slot adkit-slot--default-width ${existingClasses}`.trim()
-  slot.dataset.adkitSite = config.siteId
-  slot.dataset.adkitSlot = config.slot
   slot.dataset.adkitRatio = config.aspectRatio
   slot.dataset.adkitSize = config.size
 

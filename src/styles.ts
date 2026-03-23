@@ -71,13 +71,12 @@ const STYLES = `
 }
 
 /*
- * Height reset.
+ * Height reset for slot container.
  * Ensures height is derived from width via aspect-ratio only.
  * Prevents external CSS from distorting the slot.
+ * Note: We don't reset .adkit-box which needs inset:0 to work.
  */
-.adkit-slot,
-.adkit-slot *,
-.adkit-canvas {
+.adkit-slot {
   height: auto !important;
   min-height: 0 !important;
   max-height: none !important;

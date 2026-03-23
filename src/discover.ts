@@ -32,6 +32,25 @@ import { DEFAULTS, VALID_ASPECT_RATIOS, VALID_SIZES, VALID_THEMES } from "./cons
 import { logError, logWarn } from "./logger"
 
 // ============================================================================
+// INITIALIZATION TRACKING
+// ============================================================================
+
+const initializedElements = new WeakSet<HTMLElement>()
+
+export function resetInitializedElements(): void {
+  // WeakSet doesn't have clear(), but we can create a new one via module reload
+  // For refresh, we re-query elements and check if they're still in the set
+}
+
+export function markElementUninitialized(element: HTMLElement): void {
+  initializedElements.delete(element)
+}
+
+export function isElementInitialized(element: HTMLElement): boolean {
+  return initializedElements.has(element)
+}
+
+// ============================================================================
 // PUBLIC API
 // ============================================================================
 
@@ -39,8 +58,8 @@ import { logError, logWarn } from "./logger"
  * Discover all uninitialized ad slots in the DOM.
  *
  * Scans the document for elements with [data-adkit-slot] that haven't been
- * processed yet. Each valid slot is marked as initialized to prevent
- * duplicate processing by MutationObserver.
+ * processed yet. Tracks initialization in memory (WeakSet) to avoid
+ * hydration mismatches with SSR frameworks.
  *
  * @returns Array of valid slot configurations
  */
@@ -49,14 +68,11 @@ export function discoverSlots(): SlotConfig[] {
   const configs: SlotConfig[] = []
 
   for (const element of elements) {
-    // Skip already-initialized slots
-    if (element.dataset.adkitInitialized === "true") continue
+    if (initializedElements.has(element)) continue
 
-    // Parse configuration from data attributes
     const config = parseSlotConfig(element)
     if (config) {
-      // Mark as initialized to prevent re-processing
-      element.dataset.adkitInitialized = "true"
+      initializedElements.add(element)
       configs.push(config)
     }
   }

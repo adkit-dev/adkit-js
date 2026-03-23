@@ -21,6 +21,7 @@
 
 import type { AdkitEvent, SlotConfig, ServeResponse } from "./types"
 import { ADKIT_EVENTS_URL } from "./constants"
+import { logError } from "./logger"
 
 // ============================================================================
 // TRACKING STATE
@@ -59,9 +60,17 @@ export function sendEvent(event: AdkitEvent): void {
       body: JSON.stringify(event),
       keepalive: true,
       credentials: "omit",
-    }).catch(() => {})
-  } catch {
-    // Never throw from SDK - silently swallow all errors
+    }).catch((error) => {
+      logError("Failed to send analytics event", {
+        eventType: event.type,
+        error: error instanceof Error ? error.message : String(error),
+      })
+    })
+  } catch (error) {
+    logError("Failed to send analytics event", {
+      eventType: event.type,
+      error: error instanceof Error ? error.message : String(error),
+    })
   }
 }
 

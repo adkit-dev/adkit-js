@@ -18,6 +18,7 @@
 
 import type { ServeResponse, SlotConfig } from "./types"
 import { ADKIT_SERVE_URL, FETCH_TIMEOUT_MS } from "./constants"
+import { logError } from "./logger"
 
 // ============================================================================
 // PUBLIC API
@@ -61,20 +62,29 @@ export async function fetchAd(config: SlotConfig): Promise<ServeResponse> {
     // Clear timeout since we got a response
     clearTimeout(timeoutId)
 
-    // Non-200 responses fall back to empty status
     if (!response.ok) {
+      logError("Serve API returned non-200", {
+        slotId: config.identity,
+        siteId: config.siteId,
+        slot: config.slot,
+        status: response.status,
+      })
       return { status: "empty" }
     }
 
-    // Parse and return the JSON response
     const data = await response.json()
     return data as ServeResponse
-  } catch {
-    // Clear timeout on error
+  } catch (error) {
     clearTimeout(timeoutId)
 
-    // Any error (network, timeout, parse error) returns empty status
-    // This ensures the slot always renders something (placeholder)
+    const isTimeout = error instanceof DOMException && error.name === "AbortError"
+    logError(isTimeout ? "Serve API timeout" : "Serve API fetch failed", {
+      slotId: config.identity,
+      siteId: config.siteId,
+      slot: config.slot,
+      error: error instanceof Error ? error.message : String(error),
+    })
+
     return { status: "empty" }
   }
 }

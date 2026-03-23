@@ -25,7 +25,7 @@ export const ADKIT_BOOK_URL = "https://adkit.dev/book"
 // ============================================================================
 
 /** Current SDK version (follows semver) */
-export const ADKIT_VERSION = "1.0.0"
+export const ADKIT_VERSION = "1.1.0"
 
 // ============================================================================
 // ASPECT RATIO MAPPINGS

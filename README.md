@@ -2,9 +2,9 @@
 
 Vanilla JavaScript SDK for selling ad space directly on your website.
 
-![Bundle Size](https://img.shields.io/badge/minified-~23KB-blue)
-![Gzipped](https://img.shields.io/badge/gzipped-~7KB-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
+Bundle Size
+Gzipped
+License
 
 ## What This Does
 
@@ -45,25 +45,29 @@ Download `dist/v1.js` and serve it from your own infrastructure.
 
 ### Data Attributes
 
-| Attribute | Required | Default | Description |
-|-----------|----------|---------|-------------|
-| `data-adkit-site` | Yes | — | Your Adkit site ID |
-| `data-adkit-slot` | Yes | — | Unique slot name (alphanumeric, hyphens, underscores) |
-| `data-adkit-aspect-ratio` | Yes | — | `"16:9"`, `"4:3"`, `"1:1"`, `"9:16"`, `"banner"` |
-| `data-adkit-price` | Yes | — | Daily price in cents (e.g., 2500 = $25/day). Sets the slot price when first detected. Price increases apply immediately; decreases require confirmation. |
-| `data-adkit-size` | No | `"lg"` | Text size: `"sm"`, `"md"`, `"lg"` |
-| `data-adkit-theme` | No | `"auto"` | `"light"`, `"dark"`, `"auto"` |
-| `data-adkit-silent` | No | `"false"` | Disable analytics tracking |
+
+| Attribute                 | Required | Default   | Description                                                                                                                                              |
+| ------------------------- | -------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data-adkit-site`         | Yes      | —         | Your Adkit site ID                                                                                                                                       |
+| `data-adkit-slot`         | Yes      | —         | Unique slot name (alphanumeric, hyphens, underscores)                                                                                                    |
+| `data-adkit-aspect-ratio` | Yes      | —         | `"16:9"`, `"4:3"`, `"1:1"`, `"9:16"`, `"banner"`                                                                                                         |
+| `data-adkit-price`        | Yes      | —         | Daily price in cents (e.g., 2500 = $25/day). Sets the slot price when first detected. Price increases apply immediately; decreases require confirmation. |
+| `data-adkit-size`         | No       | `"lg"`    | Text size: `"sm"`, `"md"`, `"lg"`                                                                                                                        |
+| `data-adkit-theme`        | No       | `"auto"`  | `"light"`, `"dark"`, `"auto"`                                                                                                                            |
+| `data-adkit-silent`       | No       | `"false"` | Disable analytics tracking                                                                                                                               |
+
 
 ### Aspect Ratios
 
-| Value | Ratio | Use Case |
-|-------|-------|----------|
-| `"16:9"` | 16:9 | Hero banners, video-style |
-| `"4:3"` | 4:3 | Sidebar, content blocks |
-| `"1:1"` | 1:1 | Square, social-style |
-| `"9:16"` | 9:16 | Vertical/mobile, stories |
-| `"banner"` | 728:90 | Leaderboard banner |
+
+| Value      | Ratio  | Use Case                  |
+| ---------- | ------ | ------------------------- |
+| `"16:9"`   | 16:9   | Hero banners, video-style |
+| `"4:3"`    | 4:3    | Sidebar, content blocks   |
+| `"1:1"`    | 1:1    | Square, social-style      |
+| `"9:16"`   | 9:16   | Vertical/mobile, stories  |
+| `"banner"` | 728:90 | Leaderboard banner        |
+
 
 ### Sizes
 
@@ -124,12 +128,14 @@ Override default colors with data attributes:
 ></div>
 ```
 
-| Attribute | Description |
-|-----------|-------------|
-| `data-adkit-bg-color` | Background color (CSS color value) |
-| `data-adkit-text-color-primary` | Price text color |
-| `data-adkit-text-color-secondary` | Label and CTA text color |
-| `data-adkit-border-color` | Dashed border color (applied at 40%/60% opacity) |
+
+| Attribute                         | Description                                      |
+| --------------------------------- | ------------------------------------------------ |
+| `data-adkit-bg-color`             | Background color (CSS color value)               |
+| `data-adkit-text-color-primary`   | Price text color                                 |
+| `data-adkit-text-color-secondary` | Label and CTA text color                         |
+| `data-adkit-border-color`         | Dashed border color (applied at 40%/60% opacity) |
+
 
 ## JavaScript API
 
@@ -197,6 +203,7 @@ The SDK tracks `slot_mount`, `slot_view`, `slot_click`, and `slot_duplicate` eve
 ```
 
 Notes:
+
 - `slot_view` fires for both active ads and placeholders (for fill rate calculation)
 - `bookingId` is only present on active ad events
 - Events use `fetch` with `keepalive: true` and `credentials: "omit"`
@@ -224,6 +231,7 @@ The SDK sends error logs to `https://adkit.dev/api/sdk-logs` for monitoring. Eac
 - Slot context (siteId, slot name)
 
 Logged errors include:
+
 - Missing/invalid configuration attributes
 - API fetch failures and timeouts
 - Image load failures
@@ -319,6 +327,7 @@ Set your slot price directly in your HTML:
 The first time the SDK mounts, it registers this slot at $25/day. The slot is immediately bookable.
 
 To change the price, update it in your code and redeploy:
+
 - **Price increases** apply instantly on the next page load
 - **Price decreases** require confirmation via email or dashboard notification (protects against devtools manipulation)
 

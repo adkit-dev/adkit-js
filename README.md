@@ -19,10 +19,11 @@ Drop a script tag and a `<div>` on your page. The SDK renders ad slots that eith
   data-adkit-site="your-site-id"
   data-adkit-slot="sidebar"
   data-adkit-aspect-ratio="4:3"
+  data-adkit-price="2500"
 ></div>
 ```
 
-That's it. The SDK auto-discovers and renders the slot.
+That's it. The SDK auto-discovers and renders the slot at $25/day.
 
 ## Installation
 
@@ -49,7 +50,7 @@ Download `dist/v1.js` and serve it from your own infrastructure.
 | `data-adkit-site` | Yes | — | Your Adkit site ID |
 | `data-adkit-slot` | Yes | — | Unique slot name (alphanumeric, hyphens, underscores) |
 | `data-adkit-aspect-ratio` | Yes | — | `"16:9"`, `"4:3"`, `"1:1"`, `"9:16"`, `"banner"` |
-| `data-adkit-price` | No | — | Daily price in cents (e.g., 2500 = $25/day). Sets the slot price when first detected. Price increases apply immediately; decreases require confirmation. |
+| `data-adkit-price` | Yes | — | Daily price in cents (e.g., 2500 = $25/day). Sets the slot price when first detected. Price increases apply immediately; decreases require confirmation. |
 | `data-adkit-size` | No | `"lg"` | Text size: `"sm"`, `"md"`, `"lg"` |
 | `data-adkit-theme` | No | `"auto"` | `"light"`, `"dark"`, `"auto"` |
 | `data-adkit-silent` | No | `"false"` | Disable analytics tracking |
@@ -325,12 +326,11 @@ You can also change prices in the dashboard if you prefer.
 
 ## How Pricing Works
 
-1. Set `data-adkit-price` in your code. The first mount registers the slot at that price.
+1. Set `data-adkit-price` in your code (required). The first mount registers the slot at that price.
 2. To increase the price, change it in code and redeploy. Increases apply automatically.
 3. To decrease the price, change it in code and redeploy. You'll receive an email/notification to confirm.
 4. The booking page charges the database price, which syncs with your code-declared price.
 5. Dashboard price changes take effect immediately regardless of direction.
-6. If no price is set, the slot is created but not bookable until you add one.
 
 ## License
 

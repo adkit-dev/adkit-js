@@ -15,9 +15,9 @@
  * - data-adkit-site: Publisher's site ID
  * - data-adkit-slot: Unique slot name
  * - data-adkit-aspect-ratio: Aspect ratio (16:9, 4:3, 1:1, 9:16, banner)
+ * - data-adkit-price: Daily price in cents (e.g., 2500 = $25/day)
  *
  * ## Optional Attributes
- * - data-adkit-price: Loading-state price hint (cents)
  * - data-adkit-size: Text size (sm, md, lg)
  * - data-adkit-theme: Color theme (light, dark, auto)
  * - data-adkit-silent: Disable analytics (true/false)
@@ -120,17 +120,18 @@ function parseSlotConfig(element: HTMLElement): SlotConfig | null {
     return null
   }
 
-  // ── Parse Optional Attributes ─────────────────────────────────────────────
-
-  let price: number | undefined = undefined
-  if (priceRaw) {
-    const parsed = parseInt(priceRaw, 10)
-    if (!isNaN(parsed) && parsed >= 0) {
-      price = parsed
-    } else {
-      logWarn(`Invalid price: "${priceRaw}"`, { siteId, slot })
-    }
+  if (!priceRaw) {
+    logError("Missing required attribute: data-adkit-price", { siteId, slot })
+    return null
   }
+
+  const price = parseInt(priceRaw, 10)
+  if (isNaN(price) || price < 0) {
+    logError(`Invalid price: "${priceRaw}"`, { siteId, slot, reason: "Must be a non-negative integer (cents)" })
+    return null
+  }
+
+  // ── Parse Optional Attributes ─────────────────────────────────────────────
 
   const size = (sizeRaw as Size) || DEFAULTS.size
   if (sizeRaw && !VALID_SIZES.includes(size)) {

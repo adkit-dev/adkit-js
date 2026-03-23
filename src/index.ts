@@ -147,19 +147,26 @@ function setupMutationObserver(): void {
   if (typeof MutationObserver === "undefined") return
 
   mutationObserver = new MutationObserver((mutations) => {
-    // Skip if we're currently initializing (our own DOM changes)
     if (isInitializing) return
 
-    // Check if any mutation added a new slot element (not just modified existing ones)
+    const isValidSlot = (el: HTMLElement): boolean => {
+      return !!(
+        el.dataset?.adkitSlot &&
+        el.dataset?.adkitSite &&
+        el.dataset?.adkitAspectRatio &&
+        el.dataset?.adkitPrice &&
+        el.dataset?.adkitInitialized !== "true"
+      )
+    }
+
     const hasNewSlot = mutations.some((mutation) => {
       for (const node of mutation.addedNodes) {
         if (node instanceof HTMLElement) {
-          if (node.dataset?.adkitSlot && node.dataset?.adkitInitialized !== "true") {
-            return true
-          }
-          if (node.querySelector?.("[data-adkit-slot]:not([data-adkit-initialized='true'])")) {
-            return true
-          }
+          if (isValidSlot(node)) return true
+          const nested = node.querySelector?.<HTMLElement>(
+            "[data-adkit-slot][data-adkit-site][data-adkit-aspect-ratio][data-adkit-price]:not([data-adkit-initialized='true'])"
+          )
+          if (nested) return true
         }
       }
       return false

@@ -2,8 +2,8 @@
 
 Vanilla JavaScript SDK for selling ad space directly on your website.
 
-![Bundle Size](https://img.shields.io/badge/minified-~18KB-blue)
-![Gzipped](https://img.shields.io/badge/gzipped-~5.8KB-blue)
+![Bundle Size](https://img.shields.io/badge/minified-~23KB-blue)
+![Gzipped](https://img.shields.io/badge/gzipped-~7KB-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ## What This Does
@@ -90,7 +90,7 @@ When an advertiser has booked the slot, their creative image is rendered. Clicks
 
 ### SPA Support
 
-A MutationObserver automatically detects dynamically added slots. For edge cases where automatic detection doesn't work, call `window.__adkit.refresh()` to manually re-scan the DOM.
+A MutationObserver automatically detects dynamically added slots. The observer is optimized to only trigger when new uninitialized slots are added—it ignores DOM changes from the SDK's own rendering. For edge cases where automatic detection doesn't work, call `window.__adkit.refresh()` to manually re-scan the DOM.
 
 ## Theming
 
@@ -198,19 +198,38 @@ The SDK tracks `slot_mount`, `slot_view`, `slot_click`, and `slot_duplicate` eve
 Notes:
 - `slot_view` fires for both active ads and placeholders (for fill rate calculation)
 - `bookingId` is only present on active ad events
-- Events use `navigator.sendBeacon()` with `fetch` fallback
+- Events use `fetch` with `keepalive: true` and `credentials: "omit"`
 - All event errors are silently swallowed
 - Disable tracking per-slot with `data-adkit-silent="true"`
 
 ## Error Handling
 
-- **Missing required attributes** — Slot is skipped, console error logged
-- **Invalid slot names** — Slot is skipped
+- **Missing required attributes** — Slot is skipped, error logged
+- **Invalid slot names** — Slot is skipped, error logged
 - **Fetch failures** — 5s timeout, no retry, falls back to placeholder
 - **Image load failures** — Automatic fallback to placeholder
 - **Duplicate slots** — Warning logged, both still render
 
 The SDK never throws errors or breaks the host page.
+
+## Error Logging
+
+The SDK sends error logs to `https://adkit.dev/api/sdk-logs` for monitoring. Each log includes:
+
+- Error message and stack trace
+- SDK version
+- Page URL
+- User agent
+- Slot context (siteId, slot name)
+
+Logged errors include:
+- Missing/invalid configuration attributes
+- API fetch failures and timeouts
+- Image load failures
+- Duplicate slot detection
+- Initialization errors
+
+Logs are sent via `fetch` with `keepalive: true` and never block rendering. Console errors/warnings are also shown locally for debugging.
 
 ## Examples
 
@@ -268,7 +287,7 @@ If your site uses CSP, allow:
 
 ```
 script-src: cdn.adkit.dev
-connect-src: adkit.dev
+connect-src: adkit.dev (for API and logging)
 img-src: ufs.sh (uploadthing)
 ```
 

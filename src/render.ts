@@ -11,6 +11,7 @@ import type { ServeResponse, SlotConfig, Theme } from "./types"
 import { ASPECT_RATIOS } from "./constants"
 import { sendClickEvent } from "./events"
 import { openModal } from "./modal"
+import { logError } from "./logger"
 
 // ============================================================================
 // THEME HANDLING
@@ -181,6 +182,12 @@ function renderActive(
   img.style.objectFit = "contain"
 
   img.onerror = () => {
+    logError("Ad image failed to load", {
+      slotId: config.identity,
+      siteId: config.siteId,
+      slot: config.slot,
+      imageUrl: response.imageUrl,
+    })
     renderSlot(config, { status: "empty" })
   }
 

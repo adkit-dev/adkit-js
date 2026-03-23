@@ -29,6 +29,7 @@
 
 import type { AspectRatio, Size, SlotConfig, SlotStyles, Theme } from "./types"
 import { DEFAULTS, VALID_ASPECT_RATIOS, VALID_SIZES, VALID_THEMES } from "./constants"
+import { logError, logWarn } from "./logger"
 
 // ============================================================================
 // PUBLIC API
@@ -93,59 +94,52 @@ function parseSlotConfig(element: HTMLElement): SlotConfig | null {
   const textColorSecondary = element.dataset.adkitTextColorSecondary
   const borderColor = element.dataset.adkitBorderColor
 
-  // ── Validate Required Attributes ──────────────────────────────────────────
-
   if (!siteId) {
-    console.error("[Adkit] Missing required attribute: data-adkit-site")
+    logError("Missing required attribute: data-adkit-site", { element: element.outerHTML.slice(0, 200) })
     return null
   }
 
   if (!slot) {
-    console.error("[Adkit] Missing required attribute: data-adkit-slot")
+    logError("Missing required attribute: data-adkit-slot", { siteId })
     return null
   }
 
-  // Validate slot name format (alphanumeric, hyphens, underscores only)
   if (!/^[A-Za-z0-9_-]+$/.test(slot)) {
-    console.error(`[Adkit] Invalid slot name "${slot}". Only letters, numbers, hyphens, and underscores allowed.`)
+    logError(`Invalid slot name "${slot}"`, { siteId, slot, reason: "Only letters, numbers, hyphens, and underscores allowed" })
     return null
   }
 
   if (!aspectRatioRaw) {
-    console.error("[Adkit] Missing required attribute: data-adkit-aspect-ratio")
+    logError("Missing required attribute: data-adkit-aspect-ratio", { siteId, slot })
     return null
   }
 
   const aspectRatio = aspectRatioRaw as AspectRatio
   if (!VALID_ASPECT_RATIOS.includes(aspectRatio)) {
-    console.error(`[Adkit] Invalid aspect ratio: "${aspectRatioRaw}". Must be one of: ${VALID_ASPECT_RATIOS.join(", ")}`)
+    logError(`Invalid aspect ratio: "${aspectRatioRaw}"`, { siteId, slot, validOptions: VALID_ASPECT_RATIOS })
     return null
   }
 
   // ── Parse Optional Attributes ─────────────────────────────────────────────
 
-  // Price is optional - only used as loading-state hint
-  // Server response is the source of truth for actual pricing
   let price: number | undefined = undefined
   if (priceRaw) {
     const parsed = parseInt(priceRaw, 10)
     if (!isNaN(parsed) && parsed >= 0) {
       price = parsed
     } else {
-      console.warn(`[Adkit] Invalid price: "${priceRaw}". Ignoring.`)
+      logWarn(`Invalid price: "${priceRaw}"`, { siteId, slot })
     }
   }
 
-  // Size with validation and fallback
   const size = (sizeRaw as Size) || DEFAULTS.size
   if (sizeRaw && !VALID_SIZES.includes(size)) {
-    console.warn(`[Adkit] Invalid size: "${sizeRaw}". Using default: ${DEFAULTS.size}`)
+    logWarn(`Invalid size: "${sizeRaw}"`, { siteId, slot, validOptions: VALID_SIZES })
   }
 
-  // Theme with validation and fallback
   const theme = (themeRaw as Theme) || DEFAULTS.theme
   if (themeRaw && !VALID_THEMES.includes(theme)) {
-    console.warn(`[Adkit] Invalid theme: "${themeRaw}". Using default: ${DEFAULTS.theme}`)
+    logWarn(`Invalid theme: "${themeRaw}"`, { siteId, slot, validOptions: VALID_THEMES })
   }
 
   // Silent mode (string "true" → boolean true)

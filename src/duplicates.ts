@@ -20,6 +20,7 @@
 
 import type { SlotConfig } from "./types"
 import { sendDuplicateEvent } from "./events"
+import { logWarn } from "./logger"
 
 // ============================================================================
 // MODULE STATE
@@ -52,16 +53,15 @@ const initializedIdentities = new Set<string>()
  */
 export function checkDuplicate(config: SlotConfig): boolean {
   if (initializedIdentities.has(config.identity)) {
-    // Log warning for publisher to see in console
-    console.warn(`[Adkit] Duplicate slot: ${config.identity}`)
-
-    // Send analytics event for tracking
+    logWarn(`Duplicate slot detected: ${config.identity}`, {
+      slotId: config.identity,
+      siteId: config.siteId,
+      slot: config.slot,
+    })
     sendDuplicateEvent(config)
-
     return true
   }
 
-  // First occurrence - add to tracking set
   initializedIdentities.add(config.identity)
   return false
 }

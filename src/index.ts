@@ -21,6 +21,7 @@ import { ADKIT_VERSION, MUTATION_DEBOUNCE_MS } from "./constants"
 import { discoverSlots } from "./discover"
 import { checkDuplicate, resetDuplicates } from "./duplicates"
 import { resetTracking, sendMountEvent } from "./events"
+import { captureException, logError, logInfo } from "./logger"
 import { observeSlot } from "./observer"
 import { renderLoading, renderSlot } from "./render"
 import { fetchAd } from "./serve"
@@ -74,38 +75,31 @@ const slotStates = new Map<string, { config: SlotConfig; response: ServeResponse
  * @param config - Parsed slot configuration
  */
 async function initializeSlot(config: SlotConfig): Promise<void> {
-  // Check for duplicate slot identities on the same page
-  const isDuplicate = checkDuplicate(config)
-  if (isDuplicate) {
-    // Still render duplicates to avoid breaking the page layout
-    // The duplicate event has already been sent by checkDuplicate()
+  try {
+    checkDuplicate(config)
+
+    if (!validateSlot(config)) {
+      return
+    }
+
+    renderLoading(config)
+    sendMountEvent(config)
+
+    const response = await fetchAd(config)
+
+    if (!config.element.isConnected) return
+
+    slotStates.set(config.identity, { config, response })
+    renderSlot(config, response)
+    observeSlot(config, response)
+  } catch (error) {
+    captureException(error, {
+      slotId: config.identity,
+      siteId: config.siteId,
+      slot: config.slot,
+      phase: "initializeSlot",
+    })
   }
-
-  // Validate slot configuration (logs errors for invalid configs)
-  if (!validateSlot(config)) {
-    return
-  }
-
-  // Render loading state immediately to reserve space and prevent layout shift
-  renderLoading(config)
-
-  // Send mount event (fires before API response for auto-slot-creation)
-  sendMountEvent(config)
-
-  // Fetch ad data from the serve API
-  const response = await fetchAd(config)
-
-  // Check if element was removed from DOM during fetch
-  if (!config.element.isConnected) return
-
-  // Cache the response for potential future use
-  slotStates.set(config.identity, { config, response })
-
-  // Render the final state (active ad or placeholder)
-  renderSlot(config, response)
-
-  // Set up IntersectionObserver for view tracking
-  observeSlot(config, response)
 }
 
 /**
@@ -115,13 +109,13 @@ async function initializeSlot(config: SlotConfig): Promise<void> {
  * This function is called on initial load and by the MutationObserver.
  */
 async function initializeAllSlots(): Promise<void> {
-  // Find all uninitialized slots in the DOM
-  const configs = discoverSlots()
-
-  if (configs.length === 0) return
-
-  // Initialize all slots in parallel (API calls happen concurrently)
-  await Promise.all(configs.map(initializeSlot))
+  try {
+    const configs = discoverSlots()
+    if (configs.length === 0) return
+    await Promise.all(configs.map(initializeSlot))
+  } catch (error) {
+    captureException(error, { phase: "initializeAllSlots" })
+  }
 }
 
 // ============================================================================
@@ -175,43 +169,37 @@ function setupMutationObserver(): void {
  * idempotent - calling it multiple times has no effect after the first call.
  */
 async function init(): Promise<void> {
-  // Idempotency check: exit if already initialized
-  if (window.__adkit) return
+  try {
+    if (window.__adkit) return
 
-  // Expose public API on window object
-  window.__adkit = {
-    version: ADKIT_VERSION,
+    window.__adkit = {
+      version: ADKIT_VERSION,
 
-    /**
-     * Refresh all slots on the page.
-     *
-     * This clears all tracking state and re-initializes every slot.
-     * Useful for SPA route changes or manual refresh triggers.
-     */
-    refresh: async () => {
-      // Clear all tracking state
-      resetTracking()
-      resetDuplicates()
-      slotStates.clear()
+      refresh: async () => {
+        try {
+          resetTracking()
+          resetDuplicates()
+          slotStates.clear()
 
-      // Remove initialized flag from all slots so they can be re-processed
-      document.querySelectorAll<HTMLElement>("[data-adkit-slot]").forEach((el) => {
-        delete el.dataset.adkitInitialized
-      })
+          document.querySelectorAll<HTMLElement>("[data-adkit-slot]").forEach((el) => {
+            delete el.dataset.adkitInitialized
+          })
 
-      // Re-discover and initialize all slots
-      await initializeAllSlots()
-    },
+          await initializeAllSlots()
+        } catch (error) {
+          captureException(error, { phase: "refresh" })
+        }
+      },
+    }
+
+    injectStyles()
+    await initializeAllSlots()
+    setupMutationObserver()
+
+    logInfo("SDK initialized", { version: ADKIT_VERSION })
+  } catch (error) {
+    captureException(error, { phase: "init" })
   }
-
-  // Inject CSS styles (checks for existing styles to avoid duplicates)
-  injectStyles()
-
-  // Initialize all existing slots
-  await initializeAllSlots()
-
-  // Set up observer for dynamically added slots
-  setupMutationObserver()
 }
 
 // ============================================================================

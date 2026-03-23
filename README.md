@@ -49,7 +49,7 @@ Download `dist/v1.js` and serve it from your own infrastructure.
 | `data-adkit-site` | Yes | — | Your Adkit site ID |
 | `data-adkit-slot` | Yes | — | Unique slot name (alphanumeric, hyphens, underscores) |
 | `data-adkit-aspect-ratio` | Yes | — | `"16:9"`, `"4:3"`, `"1:1"`, `"9:16"`, `"banner"` |
-| `data-adkit-price` | No | — | Loading-state display hint only. Server price overrides on response. |
+| `data-adkit-price` | No | — | Daily price in cents (e.g., 2500 = $25/day). Sets the slot price when first detected. Price increases apply immediately; decreases require confirmation. |
 | `data-adkit-size` | No | `"lg"` | Text size: `"sm"`, `"md"`, `"lg"` |
 | `data-adkit-theme` | No | `"auto"` | `"light"`, `"dark"`, `"auto"` |
 | `data-adkit-silent` | No | `"false"` | Disable analytics tracking |
@@ -214,7 +214,7 @@ The SDK never throws errors or breaks the host page.
 
 ## Examples
 
-Premium banner with price hint:
+Premium banner with price:
 
 ```html
 <div
@@ -283,9 +283,35 @@ Required APIs: IntersectionObserver, MutationObserver, fetch, CSS `aspect-ratio`
 
 Custom border colors via `data-adkit-border-color` require `color-mix()` support (Chrome 111+, Firefox 113+, Safari 16.2+).
 
+## Setting Prices in Code
+
+Set your slot price directly in your HTML:
+
+```html
+<div
+  data-adkit-site="your-site-id"
+  data-adkit-slot="sidebar"
+  data-adkit-aspect-ratio="4:3"
+  data-adkit-price="2500"
+></div>
+```
+
+The first time the SDK mounts, it registers this slot at $25/day. The slot is immediately bookable.
+
+To change the price, update it in your code and redeploy:
+- **Price increases** apply instantly on the next page load
+- **Price decreases** require confirmation via email or dashboard notification (protects against devtools manipulation)
+
+You can also change prices in the dashboard if you prefer.
+
 ## How Pricing Works
 
-Publishers set their slot price in the Adkit dashboard. The SDK fetches the price from the server on every page load. The `data-adkit-price` attribute is a loading-state hint only—it has no effect on actual pricing. Booking and payment always use the server-side price from the database. This design prevents price manipulation via browser devtools.
+1. Set `data-adkit-price` in your code. The first mount registers the slot at that price.
+2. To increase the price, change it in code and redeploy. Increases apply automatically.
+3. To decrease the price, change it in code and redeploy. You'll receive an email/notification to confirm.
+4. The booking page charges the database price, which syncs with your code-declared price.
+5. Dashboard price changes take effect immediately regardless of direction.
+6. If no price is set, the slot is created but not bookable until you add one.
 
 ## License
 

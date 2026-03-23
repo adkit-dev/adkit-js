@@ -70,9 +70,10 @@ export type SlotConfig = {
   /** Aspect ratio for the slot container */
   aspectRatio: AspectRatio
   /**
-   * Price hint from data attribute (in cents).
-   * This is ONLY used during the loading state before the server responds.
-   * The actual price displayed comes from the server response (serverPrice).
+   * Daily price in cents (e.g., 2500 = $25.00/day).
+   * Sets the slot price when first detected by the server. Price increases
+   * apply immediately. Price decreases require publisher confirmation.
+   * Also shown in the placeholder while the server fetch is in-flight.
    */
   price?: number
   /**
@@ -147,8 +148,8 @@ export type ServeResponse =
  * Event sent when a slot is first initialized on the page.
  *
  * This fires immediately after the slot is discovered, before the serve API
- * responds. The price field (if present) comes from the data attribute, not
- * the server, and is used by the backend for auto-slot-creation.
+ * responds. The price field (if present) comes from the data attribute and
+ * is used by the backend to set or update the slot's price.
  */
 export type SlotMountEvent = {
   type: "slot_mount"
@@ -158,7 +159,7 @@ export type SlotMountEvent = {
   slot: string
   /** Current page pathname */
   pathname: string
-  /** Price from data attribute (optional, for auto-slot-creation) */
+  /** Daily price in cents. Sets slot price on first detection; increases apply immediately, decreases require confirmation. */
   price?: number
   /** Aspect ratio from data attribute */
   aspectRatio: string

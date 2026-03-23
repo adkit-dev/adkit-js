@@ -82,8 +82,11 @@ export function sendEvent(event: AdkitEvent): void {
  * Send a slot_mount event.
  *
  * Fires when a slot is first initialized on the page. This happens before
- * the serve API responds, so the price (if included) comes from the data
- * attribute, not the server. The backend uses this for auto-slot-creation.
+ * the serve API responds. The price (if included) comes from the data
+ * attribute and is used by the backend to set or update the slot's price:
+ * - New slots: created at this price, immediately bookable
+ * - Price increases: applied immediately
+ * - Price decreases: require publisher confirmation
  *
  * @param config - Slot configuration
  */
@@ -107,7 +110,7 @@ export function sendMountEvent(config: SlotConfig): void {
   }
 
   // Only include price if data attribute was provided
-  // This is used by backend for auto-slot-creation suggestions
+  // Backend uses this to set/update slot price (increases immediate, decreases need confirmation)
   if (config.price !== undefined) {
     (event as any).price = config.price
   }

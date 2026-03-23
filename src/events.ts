@@ -12,8 +12,7 @@
  * - slot_duplicate: Duplicate slot identity detected
  *
  * ## Event Delivery
- * - Primary: navigator.sendBeacon() (non-blocking, survives page unload)
- * - Fallback: fetch() with keepalive: true
+ * - Uses fetch() with keepalive: true and credentials: "omit"
  * - All errors are silently swallowed (never breaks the host page)
  *
  * ## Silent Mode
@@ -46,30 +45,21 @@ const mountedSlots = new Set<string>()
 /**
  * Send an analytics event to the Adkit API.
  *
- * Uses sendBeacon for reliable delivery (survives page unload).
- * Falls back to fetch with keepalive for browsers without sendBeacon.
+ * Uses fetch with keepalive for reliable delivery.
+ * Credentials are omitted to avoid CORS preflight issues.
  * All errors are silently swallowed to never break the host page.
  *
  * @param event - Event payload to send
  */
 export function sendEvent(event: AdkitEvent): void {
   try {
-    const payload = JSON.stringify(event)
-    const blob = new Blob([payload], { type: "text/plain" })
-
-    // Prefer sendBeacon for reliability (non-blocking, survives unload)
-    if (navigator.sendBeacon) {
-      navigator.sendBeacon(ADKIT_EVENTS_URL, blob)
-    } else {
-      // Fallback to fetch with keepalive
-      fetch(ADKIT_EVENTS_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain" },
-        body: payload,
-        keepalive: true,
-        credentials: "omit",
-      }).catch(() => {})
-    }
+    fetch(ADKIT_EVENTS_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(event),
+      keepalive: true,
+      credentials: "omit",
+    }).catch(() => {})
   } catch {
     // Never throw from SDK - silently swallow all errors
   }

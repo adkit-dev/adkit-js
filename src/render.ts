@@ -85,11 +85,10 @@ function setupThemeListener(slot: HTMLElement, config: SlotConfig): void {
  * Render loading state (shown while fetching).
  */
 export function renderLoading(config: SlotConfig): void {
-  const container = config.element
-  container.innerHTML = ""
-
-  const slot = document.createElement("div")
-  slot.className = "adkit-slot adkit-slot--default-width"
+  const slot = config.element
+  slot.innerHTML = ""
+  
+  slot.classList.add("adkit-slot", "adkit-slot--default-width")
   slot.dataset.adkitRatio = config.aspectRatio
   slot.dataset.adkitSize = config.size
   applyStyleVars(slot, config)
@@ -119,7 +118,6 @@ export function renderLoading(config: SlotConfig): void {
   box.appendChild(content)
   canvas.appendChild(box)
   slot.appendChild(canvas)
-  container.appendChild(slot)
 
   if (config.theme === "auto") {
     setupThemeListener(slot, config)
@@ -136,23 +134,21 @@ export function renderSlot(config: SlotConfig, response: ServeResponse): void {
     config.serverPrice = response.price
   }
 
-  const container = config.element
-  container.innerHTML = ""
-
   if (response.status === "active") {
-    renderActive(container, config, response)
+    renderActive(config, response)
   } else {
-    renderPlaceholder(container, config)
+    renderPlaceholder(config)
   }
 }
 
 function renderActive(
-  container: HTMLElement,
   config: SlotConfig,
   response: Extract<ServeResponse, { status: "active" }>
 ): void {
-  const slot = document.createElement("div")
-  slot.className = "adkit-slot adkit-slot--default-width"
+  const slot = config.element
+  slot.innerHTML = ""
+  
+  slot.classList.add("adkit-slot", "adkit-slot--default-width")
   slot.dataset.adkitRatio = config.aspectRatio
   slot.dataset.adkitSize = config.size
   applyStyleVars(slot, config)
@@ -194,20 +190,21 @@ function renderActive(
   link.appendChild(img)
   canvas.appendChild(link)
   slot.appendChild(canvas)
-  container.appendChild(slot)
 
   if (config.theme === "auto") {
     setupThemeListener(slot, config)
   }
 }
 
-function renderPlaceholder(container: HTMLElement, config: SlotConfig): void {
+function renderPlaceholder(config: SlotConfig): void {
   const displayPrice = config.serverPrice ?? config.price
   const hasPrice = displayPrice !== undefined
   const isBanner = config.aspectRatio === "banner"
 
-  const slot = document.createElement("div")
-  slot.className = "adkit-slot adkit-slot--default-width"
+  const slot = config.element
+  slot.innerHTML = ""
+  
+  slot.classList.add("adkit-slot", "adkit-slot--default-width")
   slot.dataset.adkitRatio = config.aspectRatio
   slot.dataset.adkitSize = config.size
   applyStyleVars(slot, config)
@@ -249,7 +246,6 @@ function renderPlaceholder(container: HTMLElement, config: SlotConfig): void {
   box.appendChild(content)
   canvas.appendChild(box)
   slot.appendChild(canvas)
-  container.appendChild(slot)
 
   box.addEventListener("click", () => {
     openModal(config)

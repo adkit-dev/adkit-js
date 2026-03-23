@@ -17,10 +17,6 @@ export function logWarn(message: string, context: LogContext = {}): void {
   console.warn(`[Adkit] ${message}`, context)
 }
 
-export function logInfo(message: string, context: LogContext = {}): void {
-  console.info(`[Adkit] ${message}`, context)
-}
-
 export function captureException(error: unknown, context: LogContext = {}): void {
   const message = error instanceof Error ? error.message : String(error)
   console.error(`[Adkit] ${message}`, { ...context, error })

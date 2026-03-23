@@ -95,7 +95,15 @@ When an advertiser has booked the slot, their creative image is rendered. Clicks
 
 ### SPA Support
 
-A MutationObserver automatically detects dynamically added slots. The observer is optimized to only trigger when new uninitialized slots are added—it ignores DOM changes from the SDK's own rendering. For edge cases where automatic detection doesn't work, call `window.__adkit.refresh()` to manually re-scan the DOM.
+A MutationObserver automatically detects dynamically added slots. The observer uses an in-memory WeakSet to track initialized elements, avoiding DOM mutations that could cause hydration issues with SSR frameworks. For edge cases where automatic detection doesn't work, call `window.__adkit.refresh()` to manually re-scan the DOM.
+
+### SSR/Hydration Compatibility
+
+The SDK works with SSR frameworks (Next.js, Nuxt, etc.):
+
+- Initialization is deferred until after the `load` event to avoid hydration conflicts
+- No DOM attributes are mutated for tracking (uses in-memory WeakSet)
+- Styles are applied directly to your container element
 
 ## Theming
 
@@ -222,23 +230,11 @@ The SDK never throws errors or breaks the host page.
 
 ## Error Logging
 
-The SDK sends error logs to `https://adkit.dev/api/sdk-logs` for monitoring. Each log includes:
-
-- Error message and stack trace
-- SDK version
-- Page URL
-- User agent
-- Slot context (siteId, slot name)
-
-Logged errors include:
-
+Errors are logged to the browser console with the `[Adkit]` prefix:
 - Missing/invalid configuration attributes
 - API fetch failures and timeouts
 - Image load failures
 - Duplicate slot detection
-- Initialization errors
-
-Logs are sent via `fetch` with `keepalive: true` and never block rendering. Console errors/warnings are also shown locally for debugging.
 
 ## Examples
 

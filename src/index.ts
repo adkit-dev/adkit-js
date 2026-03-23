@@ -18,10 +18,10 @@
  */
 
 import { ADKIT_VERSION, MUTATION_DEBOUNCE_MS } from "./constants"
-import { discoverSlots } from "./discover"
+import { discoverSlots, isElementInitialized, markElementUninitialized } from "./discover"
 import { checkDuplicate, resetDuplicates } from "./duplicates"
 import { resetTracking, sendMountEvent } from "./events"
-import { captureException, logError, logInfo } from "./logger"
+import { captureException, logError, logWarn } from "./logger"
 import { observeSlot } from "./observer"
 import { renderLoading, renderSlot } from "./render"
 import { fetchAd } from "./serve"
@@ -82,6 +82,7 @@ async function initializeSlot(config: SlotConfig): Promise<void> {
     checkDuplicate(config)
 
     if (!validateSlot(config)) {
+      logError(`Validation failed for slot: ${config.identity}`)
       return
     }
 
@@ -90,7 +91,10 @@ async function initializeSlot(config: SlotConfig): Promise<void> {
 
     const response = await fetchAd(config)
 
-    if (!config.element.isConnected) return
+    if (!config.element.isConnected) {
+      logWarn(`Element disconnected during fetch: ${config.identity}`)
+      return
+    }
 
     slotStates.set(config.identity, { config, response })
     renderSlot(config, response)
@@ -147,15 +151,13 @@ function setupMutationObserver(): void {
   if (typeof MutationObserver === "undefined") return
 
   mutationObserver = new MutationObserver((mutations) => {
-    if (isInitializing) return
-
     const isValidSlot = (el: HTMLElement): boolean => {
       return !!(
         el.dataset?.adkitSlot &&
         el.dataset?.adkitSite &&
         el.dataset?.adkitAspectRatio &&
         el.dataset?.adkitPrice &&
-        el.dataset?.adkitInitialized !== "true"
+        !isElementInitialized(el)
       )
     }
 
@@ -163,10 +165,14 @@ function setupMutationObserver(): void {
       for (const node of mutation.addedNodes) {
         if (node instanceof HTMLElement) {
           if (isValidSlot(node)) return true
-          const nested = node.querySelector?.<HTMLElement>(
-            "[data-adkit-slot][data-adkit-site][data-adkit-aspect-ratio][data-adkit-price]:not([data-adkit-initialized='true'])"
+          const slots = node.querySelectorAll?.<HTMLElement>(
+            "[data-adkit-slot][data-adkit-site][data-adkit-aspect-ratio][data-adkit-price]"
           )
-          if (nested) return true
+          if (slots) {
+            for (const slot of slots) {
+              if (!isElementInitialized(slot)) return true
+            }
+          }
         }
       }
       return false
@@ -213,7 +219,7 @@ async function init(): Promise<void> {
           slotStates.clear()
 
           document.querySelectorAll<HTMLElement>("[data-adkit-slot]").forEach((el) => {
-            delete el.dataset.adkitInitialized
+            markElementUninitialized(el)
           })
 
           await initializeAllSlots()
@@ -226,8 +232,6 @@ async function init(): Promise<void> {
     injectStyles()
     await initializeAllSlots()
     setupMutationObserver()
-
-    logInfo("SDK initialized", { version: ADKIT_VERSION })
   } catch (error) {
     captureException(error, { phase: "init" })
   }
@@ -238,13 +242,26 @@ async function init(): Promise<void> {
 // ============================================================================
 
 /**
+ * Schedule initialization after framework hydration completes.
+ * 
+ * Uses setTimeout(0) after load event to yield to the event loop,
+ * ensuring React/Vue/etc. have finished hydrating before we touch the DOM.
+ */
+function scheduleInit(): void {
+  const runInit = () => setTimeout(() => init(), 0)
+
+  if (document.readyState === "complete") {
+    runInit()
+  } else {
+    window.addEventListener("load", runInit, { once: true })
+  }
+}
+
+/**
  * Auto-initialize when the DOM is ready.
- *
- * If the script loads before the DOM is ready, we wait for DOMContentLoaded.
- * Otherwise, we initialize immediately.
  */
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", () => init())
+  document.addEventListener("DOMContentLoaded", scheduleInit, { once: true })
 } else {
-  init()
+  scheduleInit()
 }

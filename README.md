@@ -9,7 +9,7 @@ Vanilla JavaScript SDK for configuring and selling ad space directly on your web
 
 ---
 
-## How it works
+## Overview
 
 The only requirements are our `<script>` tag and `<div>`. This SDK finds your slot `<div>`(s), fetches their status from the Adkit API, and renders one of two states:
 

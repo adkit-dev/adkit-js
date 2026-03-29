@@ -2,9 +2,9 @@
 
 Vanilla JavaScript SDK for configuring and selling ad space directly on your website from within your codebase.
 
-[![Bundle Size](https://img.shields.io/badge/minified-~18KB-blue)](https://cdn.adkit.io/v1.js)
-[![Gzipped](https://img.shields.io/badge/gzipped-~5.8KB-blue)](https://cdn.adkit.io/v1.js)
-[![Version](https://img.shields.io/badge/version-1.1.0-blue)](https://cdn.adkit.io/v1.js)
+[![Bundle Size](https://img.shields.io/badge/minified-~18KB-blue)](https://cdn.adkit.dev/v1.js)
+[![Gzipped](https://img.shields.io/badge/gzipped-~5.8KB-blue)](https://cdn.adkit.dev/v1.js)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue)](https://cdn.adkit.dev/v1.js)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ---
@@ -21,7 +21,7 @@ The only requirements are our `<script>` tag and `<div>`. This SDK finds your sl
 ## Quick start
 
 ```html
-<script src="https://cdn.adkit.io/v1.js" defer></script>
+<script src="https://cdn.adkit.dev/v1.js" defer></script>
 
 <div
   data-adkit-site="your-site-id"
@@ -40,7 +40,7 @@ This slot would go live at $25/day. Visitors can book it directly by clicking on
 ### CDN (recommended)
 
 ```html
-<script src="https://cdn.adkit.io/v1.js" defer></script>
+<script src="https://cdn.adkit.dev/v1.js" defer></script>
 ```
 
 Place this tag in your `<head>` or before `</body>`. The `defer` attribute ensures the script doesn't block page rendering.
@@ -450,7 +450,7 @@ All console messages are prefixed with `[Adkit]` for easy filtering.
 ### Multiple Slots on One Page
 
 ```html
-<script src="https://cdn.adkit.io/v1.js" defer></script>
+<script src="https://cdn.adkit.dev/v1.js" defer></script>
 
 <!-- Header leaderboard -->
 <div
@@ -511,7 +511,7 @@ router.afterEach(async () => {
 If your site uses CSP headers, add the following directives:
 
 ```
-script-src  https://cdn.adkit.io;
+script-src  https://cdn.adkit.dev;
 connect-src https://adkit.dev;
 img-src     https://ufs.sh;
 ```

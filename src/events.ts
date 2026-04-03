@@ -157,8 +157,7 @@ export function sendViewEvent(
 /**
  * Send a slot_click event.
  *
- * Fires when an active ad is clicked. Does not fire for placeholder clicks
- * (which open the booking modal instead).
+ * Fires when an active ad or placeholder is clicked.
  *
  * @param config - Slot configuration
  * @param response - API response (used to get bookingId)

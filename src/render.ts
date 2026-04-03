@@ -248,6 +248,7 @@ function renderPlaceholder(config: SlotConfig): void {
   slot.appendChild(canvas)
 
   box.addEventListener("click", () => {
+    sendClickEvent(config, null)
     openModal(config)
   })
 

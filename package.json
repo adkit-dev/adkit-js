@@ -1,6 +1,6 @@
 {
   "name": "adkit-js",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Vanilla JavaScript SDK for Adkit (adkit.dev)",
   "type": "module",
   "main": "dist/v1.js",

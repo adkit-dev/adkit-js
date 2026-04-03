@@ -173,7 +173,7 @@ When a booking is active, the slot renders the advertiser's creative as a full-s
 
 ### Placeholder State
 
-When no booking is active, the slot shows a dashed-border card with "Your ad here", your daily price (from the server), and a "Rent this spot" CTA. Clicking the placeholder opens a booking modal. Banner slots show a compact "Rent" label instead to fit the narrow format.
+When no booking is active, the slot shows a dashed-border card with "Your ad here", your daily price (from the server), and a "Rent this spot" CTA. Clicking the placeholder sends a `slot_click` event (without `bookingId`) and opens a booking modal. Banner slots show a compact "Rent" label instead to fit the narrow format.
 
 ### Booking Modal
 
@@ -330,7 +330,7 @@ On browsers without `IntersectionObserver`, the event fires immediately on rende
 
 ### `slot_click`
 
-Fires when a visitor clicks an active ad. Does not fire for placeholder clicks (those open the booking modal).
+Fires when a visitor clicks either an active ad or a placeholder slot.
 
 ```json
 {
@@ -342,6 +342,8 @@ Fires when a visitor clicks an active ad. Does not fire for placeholder clicks (
   "timestamp": 1743264000000
 }
 ```
+
+`bookingId` is only present when the clicked slot has an active booking. For placeholder clicks, `bookingId` is omitted.
 
 ### `slot_duplicate`
 

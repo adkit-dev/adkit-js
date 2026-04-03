@@ -4,7 +4,7 @@ Vanilla JavaScript SDK for configuring and selling ad space directly on your web
 
 [![Bundle Size](https://img.shields.io/badge/minified-~18KB-blue)](https://cdn.adkit.dev/v1.js)
 [![Gzipped](https://img.shields.io/badge/gzipped-~5.8KB-blue)](https://cdn.adkit.dev/v1.js)
-[![Version](https://img.shields.io/badge/version-1.1.0-blue)](https://cdn.adkit.dev/v1.js)
+[![Version](https://img.shields.io/badge/version-1.1.1-blue)](https://cdn.adkit.dev/v1.js)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ---

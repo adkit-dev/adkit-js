@@ -16,22 +16,48 @@
  * The CTA redirects to:
  * https://adkit.dev/book?siteId={siteId}&slot={slot}&ref={currentUrl}
  *
- * Note: The price is NOT included in the URL. The booking page fetches
- * the price from the database server-side to prevent manipulation.
+ * Note: The booking page fetches the price from the database server-side to prevent manipulation.
  */
 
 import type { SlotConfig } from "./types"
 import { ADKIT_BOOK_URL } from "./constants"
+import { MODAL_STYLES } from "./styles"
 
 // ============================================================================
 // MODULE STATE
 // ============================================================================
 
-/** Reference to the currently open modal (null if none) */
+/** Reference to the portal host element (Shadow DOM container) */
+let portalHost: HTMLElement | null = null
+
+/** Reference to the currently open modal overlay (inside shadow root) */
 let currentModal: HTMLElement | null = null
 
 /** Stored body overflow value to restore when modal closes */
 let previousOverflow: string = ""
+
+// ============================================================================
+// PORTAL MANAGEMENT
+// ============================================================================
+
+/**
+ * Get or create the Shadow DOM portal for the modal.
+ * Using Shadow DOM ensures complete isolation from page styles and stacking contexts.
+ */
+function getPortal(): ShadowRoot {
+  if (!portalHost) {
+    portalHost = document.createElement("div")
+    portalHost.id = "adkit-modal-portal"
+    portalHost.style.cssText = "position: fixed; inset: 0; z-index: 2147483647; pointer-events: none;"
+    document.body.appendChild(portalHost)
+
+    const shadow = portalHost.attachShadow({ mode: "open" })
+    const style = document.createElement("style")
+    style.textContent = MODAL_STYLES
+    shadow.appendChild(style)
+  }
+  return portalHost.shadowRoot!
+}
 
 // ============================================================================
 // PUBLIC API
@@ -180,8 +206,10 @@ export function openModal(config: SlotConfig): void {
   previousOverflow = document.body.style.overflow
   document.body.style.overflow = "hidden"
 
-  // Add to DOM
-  document.body.appendChild(overlay)
+  // Add to Shadow DOM portal (isolated from page stacking contexts)
+  const portal = getPortal()
+  portal.appendChild(overlay)
+  portalHost!.style.pointerEvents = "auto"
   currentModal = overlay
 }
 
@@ -200,9 +228,14 @@ export function closeModal(): void {
   // Restore body scroll
   document.body.style.overflow = previousOverflow
 
-  // Remove from DOM
+  // Remove overlay from shadow root
   currentModal.remove()
   currentModal = null
+
+  // Disable pointer events on portal when no modal is open
+  if (portalHost) {
+    portalHost.style.pointerEvents = "none"
+  }
 }
 
 // ============================================================================

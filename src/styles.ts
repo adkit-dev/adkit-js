@@ -265,18 +265,31 @@ const STYLES = `
   --adkit-padding: 0 12px;
 }
 
-/* ============================================================================
-   BOOKING MODAL
-   ============================================================================ */
+`
 
-/*
- * Modal overlay (backdrop).
- * Covers entire viewport with semi-transparent background.
+// ============================================================================
+// MODULE STATE
+// ============================================================================
+
+/**
+ * Flag to track if styles have been injected.
+ * Prevents duplicate style injection.
  */
+let injected = false
+
+// ============================================================================
+// MODAL STYLES (for Shadow DOM portal)
+// ============================================================================
+
+/**
+ * Modal-specific styles injected into the Shadow DOM portal.
+ * Isolated from page styles to prevent interference from transforms,
+ * filters, or stacking contexts on the page.
+ */
+export const MODAL_STYLES = `
 .adkit-modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 999999;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -286,10 +299,6 @@ const STYLES = `
   animation: adkit-fade-in 0.18s ease-out;
 }
 
-/*
- * Modal card (content container).
- * Centered white card with shadow and rounded corners.
- */
 .adkit-modal-card {
   position: relative;
   width: 92%;
@@ -302,10 +311,6 @@ const STYLES = `
   animation: adkit-slide-up 0.22s ease-out;
 }
 
-/* ============================================================================
-   MODAL ANIMATIONS
-   ============================================================================ */
-
 @keyframes adkit-fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
@@ -316,13 +321,6 @@ const STYLES = `
   to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ============================================================================
-   MODAL CONTENT
-   ============================================================================ */
-
-/*
- * Modal headline.
- */
 .adkit-modal-headline {
   margin: 0 0 8px;
   font-size: 20px;
@@ -331,9 +329,6 @@ const STYLES = `
   letter-spacing: -0.01em;
 }
 
-/*
- * Modal subhead (description).
- */
 .adkit-modal-subhead {
   margin: 0 0 20px;
   font-size: 14px;
@@ -341,9 +336,6 @@ const STYLES = `
   color: #555;
 }
 
-/*
- * Feature bullet list.
- */
 .adkit-modal-bullets {
   margin: 0 0 20px;
   padding: 0;
@@ -367,9 +359,6 @@ const STYLES = `
   color: #333;
 }
 
-/*
- * Price section.
- */
 .adkit-modal-price-section {
   display: flex;
   flex-direction: column;
@@ -389,19 +378,12 @@ const STYLES = `
   color: #888;
 }
 
-/* ============================================================================
-   MODAL ACTIONS
-   ============================================================================ */
-
 .adkit-modal-actions {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-/*
- * Primary CTA button.
- */
 .adkit-modal-cta {
   display: block;
   width: 100%;
@@ -421,9 +403,6 @@ const STYLES = `
   background: #333;
 }
 
-/*
- * Redirect hint text.
- */
 .adkit-modal-redirect-hint {
   display: block;
   text-align: center;
@@ -432,9 +411,6 @@ const STYLES = `
   line-height: 1.4;
 }
 
-/*
- * Cancel button.
- */
 .adkit-modal-cancel {
   display: block;
   width: 100%;
@@ -454,10 +430,6 @@ const STYLES = `
   color: #333;
 }
 
-/* ============================================================================
-   MODAL FOOTER
-   ============================================================================ */
-
 .adkit-modal-footer {
   margin-top: 16px;
   text-align: center;
@@ -475,16 +447,6 @@ const STYLES = `
   text-decoration: underline;
 }
 `
-
-// ============================================================================
-// MODULE STATE
-// ============================================================================
-
-/**
- * Flag to track if styles have been injected.
- * Prevents duplicate style injection.
- */
-let injected = false
 
 // ============================================================================
 // PUBLIC API
